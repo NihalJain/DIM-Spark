@@ -58,18 +58,33 @@
 >>> finalComb2RDD.collect()
 [('CD', bitarray('0111100')), ('CE', bitarray('0111110')), ('AC', bitarray('0111100')), ('BC', bitarray('0111000')), ('AD', bitarray('0101100')), ('AB', bitarray('0111100')), ('AE', bitarray('0101110')), ('BD', bitarray('0111100')), ('DE', bitarray('0101110')), ('BE', bitarray('0011110'))]
 
->>> comb3RDD = comb2RDD.cartesian(tidsetBitsetRDD).filter(lambda line: line[0][0][0] < line[1][0][0] and line[0][1][0] < line[1][0][0])
+>>> comb3RDD = finalComb2RDD.cartesian(tidsetBitsetRDD).filter(lambda line: line[0][0][0] < line[1][0][0] and line[0][0][1] < line[1][0][0])
 >>> comb3RDD.collect()
-[((('C', bitarray('0111000')), ('D', bitarray('0101100'))), ('E', bitarray('0000110'))), ((('A', bitarray('0101100')), ('C', bitarray('0111000'))), ('D', bitarray('0101100'))), ((('A', bitarray('0101100')), ('C', bitarray('0111000'))), ('E', bitarray('0000110'))), ((('B', bitarray('0011000')), ('C', bitarray('0111000'))), ('D', bitarray('0101100'))), ((('B', bitarray('0011000')), ('C', bitarray('0111000'))), ('E', bitarray('0000110'))), ((('A', bitarray('0101100')), ('B', bitarray('0011000'))), ('C', bitarray('0111000'))), ((('A', bitarray('0101100')), ('D', bitarray('0101100'))), ('E', bitarray('0000110'))), ((('A', bitarray('0101100')), ('B', bitarray('0011000'))), ('D', bitarray('0101100'))), ((('A', bitarray('0101100')), ('B', bitarray('0011000'))), ('E', bitarray('0000110'))), ((('B', bitarray('0011000')), ('D', bitarray('0101100'))), ('E', bitarray('0000110')))]
+[(('CD', bitarray('0111100')), ('E', bitarray('0000110'))), (('AC', bitarray('0111100')), ('D', bitarray('0101100'))), (('AC', bitarray('0111100')), ('E', bitarray('0000110'))), (('BC', bitarray('0111000')), ('D', bitarray('0101100'))), (('BC', bitarray('0111000')), ('E', bitarray('0000110'))), (('AB', bitarray('0111100')), ('C', bitarray('0111000'))), (('AD', bitarray('0101100')), ('E', bitarray('0000110'))), (('AB', bitarray('0111100')), ('D', bitarray('0101100'))), (('AB', bitarray('0111100')), ('E', bitarray('0000110'))), (('BD', bitarray('0111100')), ('E', bitarray('0000110')))]
 
->>> flatComb3RDD = comb3RDD.map(lambda line: (line[0][0], line[0][1], line[1]))
->>> flatComb3RDD.collect()
-[(('C', bitarray('0111000')), ('D', bitarray('0101100')), ('E', bitarray('0000110'))), (('A', bitarray('0101100')), ('C', bitarray('0111000')), ('D', bitarray('0101100'))), (('A', bitarray('0101100')), ('C', bitarray('0111000')), ('E', bitarray('0000110'))), (('B', bitarray('0011000')), ('C', bitarray('0111000')), ('D', bitarray('0101100'))), (('B', bitarray('0011000')), ('C', bitarray('0111000')), ('E', bitarray('0000110'))), (('A', bitarray('0101100')), ('B', bitarray('0011000')), ('C', bitarray('0111000'))), (('A', bitarray('0101100')), ('D', bitarray('0101100')), ('E', bitarray('0000110'))), (('A', bitarray('0101100')), ('B', bitarray('0011000')), ('D', bitarray('0101100'))), (('A', bitarray('0101100')), ('B', bitarray('0011000')), ('E', bitarray('0000110'))), (('B', bitarray('0011000')), ('D', bitarray('0101100')), ('E', bitarray('0000110')))]
+>>> finalComb3RDD = comb3RDD.map(calcNewBitset)
+>>> finalComb3RDD.collect()
+[('CDE', bitarray('0111110')), ('ACD', bitarray('0111100')), ('ACE', bitarray('0111110')), ('BCD', bitarray('0111100')), ('BCE', bitarray('0111110')), ('ABC', bitarray('0111100')), ('ADE', bitarray('0101110')), ('ABD', bitarray('0111100')), ('ABE', bitarray('0111110')), ('BDE', bitarray('0111110'))]
 
->>> comb4RDD = flatComb3RDD.cartesian(tidsetBitsetRDD).filter(lambda line: line[0][0][0] < line[1][0][0] and line[0][1][0] < line[1][0][0] and line[0][2][0] < line[1][0][0])
+>>> #flatComb3RDD = finalComb3RDD.map(lambda line: (line[0][0], line[0][1], line[1]))
+... #flatComb3RDD.collect()
+... 
+>>> comb4RDD = finalComb3RDD.cartesian(tidsetBitsetRDD).filter(lambda line: line[0][0][0] < line[1][0][0] and line[0][0][0] < line[1][0][0] and line[0][0][2] < line[1][0][0])
 >>> comb4RDD.collect()
-[((('A', bitarray('0101100')), ('C', bitarray('0111000')), ('D', bitarray('0101100'))), ('E', bitarray('0000110'))), ((('B', bitarray('0011000')), ('C', bitarray('0111000')), ('D', bitarray('0101100'))), ('E', bitarray('0000110'))), ((('A', bitarray('0101100')), ('B', bitarray('0011000')), ('C', bitarray('0111000'))), ('D', bitarray('0101100'))), ((('A', bitarray('0101100')), ('B', bitarray('0011000')), ('C', bitarray('0111000'))), ('E', bitarray('0000110'))), ((('A', bitarray('0101100')), ('B', bitarray('0011000')), ('D', bitarray('0101100'))), ('E', bitarray('0000110')))]
+[(('ACD', bitarray('0111100')), ('E', bitarray('0000110'))), (('BCD', bitarray('0111100')), ('E', bitarray('0000110'))), (('ABC', bitarray('0111100')), ('D', bitarray('0101100'))), (('ABC', bitarray('0111100')), ('E', bitarray('0000110'))), (('ABD', bitarray('0111100')), ('E', bitarray('0000110')))]
 
->>> flatComb4RDD = comb4RDD.map(lambda line: (line[0][0], line[0][1], line[0][2], line[1]))
->>> flatComb4RDD.collect()
-[(('A', bitarray('0101100')), ('C', bitarray('0111000')), ('D', bitarray('0101100')), ('E', bitarray('0000110'))), (('B', bitarray('0011000')), ('C', bitarray('0111000')), ('D', bitarray('0101100')), ('E', bitarray('0000110'))), (('A', bitarray('0101100')), ('B', bitarray('0011000')), ('C', bitarray('0111000')), ('D', bitarray('0101100'))), (('A', bitarray('0101100')), ('B', bitarray('0011000')), ('C', bitarray('0111000')), ('E', bitarra
+>>> finalComb4RDD = comb4RDD.map(calcNewBitset)
+>>> finalComb4RDD.collect()
+[('ACDE', bitarray('0111110')), ('BCDE', bitarray('0111110')), ('ABCD', bitarray('0111100')), ('ABCE', bitarray('0111110')), ('ABDE', bitarray('0111110'))]
+
+>>> #flatComb4RDD = comb4RDD.map(lambda line: (line[0][0], line[0][1], line[0][2], line[1]))
+... #flatComb4RDD.collect()
+... 
+>>> comb5RDD = finalComb4RDD.cartesian(tidsetBitsetRDD).filter(lambda line: line[0][0][0] < line[1][0][0] and line[0][0][0] < line[1][0][0] and line[0][0][2] < line[1][0][0] and line[0][0][3] < line[1][0][0])
+>>> comb5RDD.collect()
+[(('ABCD', bitarray('0111100')), ('E', bitarray('0000110')))]                   
+
+>>> finalComb5RDD = comb5RDD.map(calcNewBitset)
+>>> finalComb5RDD.collect()
+[('ABCDE', bitarray('0111110'))]                                                
+
