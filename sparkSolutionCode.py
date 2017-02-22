@@ -62,9 +62,15 @@ finalComb3RDD.collect()
 comb4RDD = finalComb3RDD.cartesian(tidsetBitsetRDD).filter(lambda line: line[0][0][0] < line[1][0][0] and line[0][0][0] < line[1][0][0] and line[0][0][2] < line[1][0][0])
 comb4RDD.collect()
 
-
 finalComb4RDD = comb4RDD.map(calcNewBitset)
 finalComb4RDD.collect()
 
 #flatComb4RDD = comb4RDD.map(lambda line: (line[0][0], line[0][1], line[0][2], line[1]))
 #flatComb4RDD.collect()
+
+comb5RDD = finalComb4RDD.cartesian(tidsetBitsetRDD).filter(lambda line: line[0][0][0] < line[1][0][0] and line[0][0][0] < line[1][0][0] and line[0][0][2] < line[1][0][0] and line[0][0[3] < line[1][0][0])
+comb5RDD.collect()
+
+finalComb5RDD = comb5RDD.map(calcNewBitset)
+finalComb5RDD.collect()
+
