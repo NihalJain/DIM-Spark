@@ -1,3 +1,5 @@
+>>> from bitarray import bitarray
+
 >>> datasetRDD =  sc.textFile("/home/nj/pySpark/test")
 >>> datasetRDD.collect()
 ['1\tA   C   D', '2\tB   C', '3\tA   B   C   D', '4\tA   D   E', '5\tE']
@@ -26,7 +28,6 @@
 >>> freqItemRDD.collect()
 [('C', ['1', '2', '3']), ('A', ['1', '3', '4']), ('D', ['1', '3', '4']), ('B', ['2', '3']), ('E', ['4', '5'])]
 
->>> from bitarray import bitarray
 >>> def createTidset(line):
 ...      a = bitarray(7)
 ...      a.setall(False)
@@ -39,12 +40,15 @@
 >>> tidsetBitsetRDD.collect()
 [('C', bitarray('0111000')), ('A', bitarray('0101100')), ('D', bitarray('0101100')), ('B', bitarray('0011000')), ('E', bitarray('0000110'))]
 
->>> #itemCount = tidsetBitsetRDD.map(lambda line: (line[0], line[1].count()))
-... #itemCountRDD = tidsetBitsetRDD.map(lambda line: (line[0], line[1].count()))
-... #itemCountRDD.collect()
+>>> def filterCartesianJoin(line):
+...     for item in line[0][0]:
+...         if item < line[1][0]:
+...             continue
+...         else:
+...             return False
+...     return True
 ... 
->>> #combRDD = freqItemRDD.cartesian(freqItemRDD).filter(lambda a, b: a[0] < b[0])
-... comb2RDD = tidsetBitsetRDD.cartesian(tidsetBitsetRDD).filter(lambda line: line[0][0] < line[1][0])
+>>> comb2RDD = tidsetBitsetRDD.cartesian(tidsetBitsetRDD).filter(filterCartesianJoin)
 >>> comb2RDD.collect()
 [(('C', bitarray('0111000')), ('D', bitarray('0101100'))), (('C', bitarray('0111000')), ('E', bitarray('0000110'))), (('A', bitarray('0101100')), ('C', bitarray('0111000'))), (('B', bitarray('0011000')), ('C', bitarray('0111000'))), (('A', bitarray('0101100')), ('D', bitarray('0101100'))), (('A', bitarray('0101100')), ('B', bitarray('0011000'))), (('A', bitarray('0101100')), ('E', bitarray('0000110'))), (('B', bitarray('0011000')), ('D', bitarray('0101100'))), (('D', bitarray('0101100')), ('E', bitarray('0000110'))), (('B', bitarray('0011000')), ('E', bitarray('0000110')))]
 
@@ -58,7 +62,10 @@
 >>> finalComb2RDD.collect()
 [('CD', bitarray('0111100')), ('CE', bitarray('0111110')), ('AC', bitarray('0111100')), ('BC', bitarray('0111000')), ('AD', bitarray('0101100')), ('AB', bitarray('0111100')), ('AE', bitarray('0101110')), ('BD', bitarray('0111100')), ('DE', bitarray('0101110')), ('BE', bitarray('0011110'))]
 
->>> comb3RDD = finalComb2RDD.cartesian(tidsetBitsetRDD).filter(lambda line: line[0][0][0] < line[1][0][0] and line[0][0][1] < line[1][0][0])
+>>> comb3RDD = finalComb2RDD.cartesian(tidsetBitsetRDD).filter(filterCartesianJoint)
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+NameError: name 'filterCartesianJoint' is not defined
 >>> comb3RDD.collect()
 [(('CD', bitarray('0111100')), ('E', bitarray('0000110'))), (('AC', bitarray('0111100')), ('D', bitarray('0101100'))), (('AC', bitarray('0111100')), ('E', bitarray('0000110'))), (('BC', bitarray('0111000')), ('D', bitarray('0101100'))), (('BC', bitarray('0111000')), ('E', bitarray('0000110'))), (('AB', bitarray('0111100')), ('C', bitarray('0111000'))), (('AD', bitarray('0101100')), ('E', bitarray('0000110'))), (('AB', bitarray('0111100')), ('D', bitarray('0101100'))), (('AB', bitarray('0111100')), ('E', bitarray('0000110'))), (('BD', bitarray('0111100')), ('E', bitarray('0000110')))]
 
@@ -69,7 +76,7 @@
 >>> #flatComb3RDD = finalComb3RDD.map(lambda line: (line[0][0], line[0][1], line[1]))
 ... #flatComb3RDD.collect()
 ... 
->>> comb4RDD = finalComb3RDD.cartesian(tidsetBitsetRDD).filter(lambda line: line[0][0][0] < line[1][0][0] and line[0][0][0] < line[1][0][0] and line[0][0][2] < line[1][0][0])
+>>> comb4RDD = finalComb3RDD.cartesian(tidsetBitsetRDD).filter(filterCartesianJoin)
 >>> comb4RDD.collect()
 [(('ACD', bitarray('0111100')), ('E', bitarray('0000110'))), (('BCD', bitarray('0111100')), ('E', bitarray('0000110'))), (('ABC', bitarray('0111100')), ('D', bitarray('0101100'))), (('ABC', bitarray('0111100')), ('E', bitarray('0000110'))), (('ABD', bitarray('0111100')), ('E', bitarray('0000110')))]
 
@@ -80,7 +87,7 @@
 >>> #flatComb4RDD = comb4RDD.map(lambda line: (line[0][0], line[0][1], line[0][2], line[1]))
 ... #flatComb4RDD.collect()
 ... 
->>> comb5RDD = finalComb4RDD.cartesian(tidsetBitsetRDD).filter(lambda line: line[0][0][0] < line[1][0][0] and line[0][0][0] < line[1][0][0] and line[0][0][2] < line[1][0][0] and line[0][0][3] < line[1][0][0])
+>>> comb5RDD = finalComb4RDD.cartesian(tidsetBitsetRDD).filter(filterCartesianJoin)
 >>> comb5RDD.collect()
 [(('ABCD', bitarray('0111100')), ('E', bitarray('0000110')))]                   
 
